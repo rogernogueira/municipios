@@ -172,4 +172,4 @@ def update_output_div(input_value):
         return get_grafico_municipio(dict_municipios[input_value]), get_dados_municipio(dict_municipios[input_value])
 
 if __name__ == '__main__':
-    app.run_server( port = 5030)
+    app.run_server(debug=False,host='0.0.0.0', port = 5030)
