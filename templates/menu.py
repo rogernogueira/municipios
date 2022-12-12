@@ -23,7 +23,7 @@ custom_default = dbc.Navbar(
     dbc.Container(
         [
             dbc.Col( html.Img(src=PLOTLY_LOGO, height="35px")),
-            dbc.NavbarBrand("Índice de Governancia Municípal ", href="http://municipios.comais.uft.edu.br"),
+            dbc.NavbarBrand("Índice de Governança Municipal ", href="http://municipios.comais.uft.edu.br"),
             dbc.NavbarToggler(id="navbar-toggler1"),
             dbc.Collapse(
                 dbc.Nav(
