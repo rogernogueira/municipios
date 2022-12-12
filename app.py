@@ -109,7 +109,7 @@ def get_dados_municipio(value):
                             )
     
     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
-app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True)
+app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True,assets_folder='assets',  title="IGM/CFA - 2021")
 app.layout = html.Div([
                         custom_default,
                         html.Div([
@@ -170,6 +170,4 @@ def info_hover(feature):
 def update_output_div(input_value):
     if feature is not None:
         return get_grafico_municipio(dict_municipios[input_value]), get_dados_municipio(dict_municipios[input_value])
-
-if __name__ == '__main__':
-    app.run_server(debug=False,host='0.0.0.0', port = 5030)
+server = app.server
