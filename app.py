@@ -15,7 +15,7 @@ colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', 
 color_prop = 'IGM/CFA'
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 
-df_tocantins = pd.read_pickle('data\\tocantins.pkl')
+df_tocantins = pd.read_pickle('data/tocantins.pkl')
 
 # ano de 2021
 df_tocantins_ano = df_tocantins[df_tocantins['ano'] == 2021][['nome', "Código IBGE","IGM/CFA", 'Cluster']]	
