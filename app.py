@@ -100,8 +100,8 @@ def get_dados_municipio(value):
                                     html.Div(
                                         [html.H5(f"{nome_municipio}",className="card-title"),
                                         html.H6(f"IGM/CFA :{igm_municipio}",className="card-subtitle mb-2 text-muted"),
-                                        html.H6(f"Posicão no ranking TO : {posicao_geral}º ",id="",className=""), 
-                                        html.H6(f"Posicão no {grupo} : {posicao_grupo}º ",id="",className=""), 
+                                        html.H6(f"Posição no ranking TO : {posicao_geral}º ",id="",className=""), 
+                                        html.H6(f"Posição no {grupo} : {posicao_grupo}º ",id="",className=""), 
                                        ]),
                                 ],
                                 id="info-container",
