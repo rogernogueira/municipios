@@ -27,7 +27,7 @@ ranking_geral = dict(zip(ranking_geral,range(1,len(ranking_geral)+1)))
 list_municipios = df_tocantins[['nome','Código IBGE']].groupby('nome').first().reset_index()
 dict_municipios = dict(zip(list_municipios['nome'], list_municipios['Código IBGE']))
 
-df_cidade_ibge = pd.read_json('data\\cidades.json')
+df_cidade_ibge = pd.read_json('data/cidades.json')
 df_cidade_to = df_cidade_ibge[df_cidade_ibge['codigo_uf']==17]
 
 df_cidade_to = df_cidade_to.merge(df_tocantins_ano, left_on='codigo_ibge', right_on='Código IBGE')
@@ -36,7 +36,7 @@ dict_cidade_to = df_cidade_to.to_dict('records')
 for item in dict_cidade_to:
         item["tooltip"] = f"{item['nome_x']} - {item[color_prop]} IGM/CFA "
 
-with open('assets\\to_municipios.json', encoding='utf-8') as f:
+with open('assets/to_municipios.json', encoding='utf-8') as f:
     geojson_municipios = geojson.load(f)
 
 for feature in geojson_municipios['features']:
