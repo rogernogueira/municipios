@@ -2,10 +2,12 @@ import pandas as pd
 import json
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
-from dash import Dash, html, Output, Input
+from dash import Dash, html, Output, Input, dcc
 from dash_extensions.javascript import arrow_function
 from dash_extensions.javascript import assign, Namespace
 import geojson
+import plotly.express as px
+from unidecode import unidecode
 
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
@@ -14,12 +16,16 @@ color_prop = 'IGM/CFA'
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 
 df_tocantins = pd.read_pickle('data\\tocantins.pkl')
-# ano de 2021
-df_tocantins = df_tocantins[df_tocantins['ano'] == 2021][["Código IBGE","IGM/CFA"]]	
 
+# ano de 2021
+df_tocantins_ano = df_tocantins[df_tocantins['ano'] == 2021][["Código IBGE","IGM/CFA"]]	
+
+list_municipios = df_tocantins[['nome','Código IBGE']].groupby('nome').first().reset_index()
+
+dict_municipios = dict(zip(list_municipios['nome'], list_municipios['Código IBGE']))
 df_cidade_ibge = pd.read_json('data\\cidades.json')
 df_cidade_to = df_cidade_ibge[df_cidade_ibge['codigo_uf']==17]
-df_cidade_to = df_cidade_to.merge(df_tocantins, left_on='codigo_ibge', right_on='Código IBGE')
+df_cidade_to = df_cidade_to.merge(df_tocantins_ano, left_on='codigo_ibge', right_on='Código IBGE')
 dict_cidade_to = df_cidade_to.to_dict('records') 
 for item in dict_cidade_to:
         item["tooltip"] = f"{item['nome']} - {item[color_prop]} IGM/CFA "
@@ -72,6 +78,16 @@ def get_info(feature=None):
                      "{:.3f}".format(feature["properties"][color_prop])]
 info = html.Div(children=get_info(), id="info", className="info",
                 style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
+
+def get_grafico_municipio(value):
+    df_result = df_tocantins[df_tocantins['Código IBGE'] == int(value)]
+    fig = px.line(df_result, x="ano", y="IGM/CFA", markers=True, title=f'Índice Geral de Governança - {df_result["nome"].iloc[0]}')    
+    layout_result = html.Div([
+            dcc.Graph(figure=fig, id="graph"),            
+            ], className="w-100")
+    return html.Div([layout_result], className="container shadow  bg-body rounded d-flex ")
+
+
 app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True)
 app.layout = html.Div([
                         html.Div([
@@ -81,7 +97,7 @@ app.layout = html.Div([
                                         dl.GeoJSON(data =geojson_municipios, format="geojson", id="cidades",
                                                     options=dict(style=style_handle),
                                                     zoomToBounds=True,
-                                                    zoomToBoundsOnClick=True,
+                                                    zoomToBoundsOnClick=False,
                                                     hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray='')),
                                                     hideout=dict(colorscale=colorscale, classes=classes, style=style, colorProp=color_prop),
                                                 ),  
@@ -89,27 +105,48 @@ app.layout = html.Div([
                                         info,  
                                         # geobuf resource (fastest option)
                                     ], style={'width': '100%', 'height': '90vh', 'margin': "auto", "display": "block"}, id="map"),
-                            ], className='container '),
-                             html.Div(id="state", className="container"),
-                             html.Div(id="capital", className="container"),    
-                       
+                            ], className='container shadow '),
+                            html.Div([
+                                html.Div([
+                                           html.Div([      
+                                           html.Label("Município:"),    
+                                           dcc.Dropdown(
+                                                            id='select_municipio',
+                                                            options=list(dict_municipios.keys()),
+                                                            multi=False,
+                                                            value='Palmas',
+                                                            
+                                                        ),
+                                                ], className="w-100"), 
+                                         ], id="dropdown_cidades", className="p-2 mb-2 container shadow  bg-body rounded d-flex"),
+                                html.Div(id="grafico_igm", className="container"),
+                            ], className=" d-flex flex-column w-100")     
                         ],
-                                
-                         className="container shadow  bg-body rounded row "),
+                         className="container shadow  bg-body rounded d-flex p-2 col-lg-12"),
                         
                         
 ])
 
+
 @app.callback(
-    Output("capital", "children"), 
+    Output("select_municipio", "value"), 
     [Input("cidades", "click_feature")])
 def capital_click(feature):
     if feature is not None:
-        return html.Div(f"You clicked {feature['properties']['id']}")
+        return unidecode(feature['properties']['name'].upper())
 
 @app.callback(Output("info", "children"), [Input("cidades", "hover_feature")])
 def info_hover(feature):
     return get_info(feature)
+
+@app.callback(
+    Output("grafico_igm", "children"), 
+    Input(component_id='select_municipio', component_property='value')
+)
+def update_output_div(input_value):
+    if feature is not None:
+        return get_grafico_municipio(dict_municipios[input_value])
+
 
 if __name__ == '__main__':
     app.run_server()
