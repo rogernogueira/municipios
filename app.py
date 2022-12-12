@@ -109,7 +109,7 @@ def get_dados_municipio(value):
                             )
     
     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
-app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True,assets_folder='assets',  title="IGM/CFA - 2021")
+app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True,assets_folder='assets/',  title="IGM/CFA - 2021")
 app.layout = html.Div([
                         custom_default,
                         html.Div([
