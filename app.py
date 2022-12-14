@@ -9,6 +9,7 @@ import geojson
 import plotly.express as px
 from unidecode import unidecode
 from templates.menu import  custom_default
+import babel.numbers
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
 colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
@@ -92,7 +93,10 @@ def get_dados_municipio(value):
     df_result = df_tocantins[df_tocantins['Código IBGE'] == int(value)]
     nome_municipio  = df_result["nome"].iloc[0]
     igm_municipio  = df_result["IGM/CFA"].iloc[0]
-    
+    populacao_municipio  = df_result["Dados de Identificação/Demográficos - População"].iloc[0]
+    populacao_municipio = babel.numbers.format_number(populacao_municipio, locale='pt_BR')
+    pib_municipio  = df_result["Pib per capita 2020"].iloc[0]
+    pib_municipio = babel.numbers.format_currency(pib_municipio, 'BRL', locale='pt_BR')
     posicao_geral = ranking_geral[nome_municipio]
     posicao_grupo, grupo = ranking_municipio_grupo(nome_municipio)   
     layout_result =  html.Div(
@@ -100,8 +104,16 @@ def get_dados_municipio(value):
                                     html.Div(
                                         [html.H5(f"{nome_municipio}",className="card-title"),
                                         html.H6(f"IGM/CFA :{igm_municipio}",className="card-subtitle mb-2 text-muted"),
-                                        html.H6(f"Posição no ranking TO : {posicao_geral}º ",id="",className=""), 
-                                        html.H6(f"Posição no {grupo} : {posicao_grupo}º ",id="",className=""), 
+                                        html.Div([
+                                            html.Div([
+                                                html.H6(f"Posição no ranking TO : {posicao_geral}º ",id="",className=""), 
+                                                html.H6(f"Posição no {grupo} : {posicao_grupo}º ",id="",className=""), 
+                                            ]),
+                                            html.Div([
+                                                html.H6(f"PIB : {pib_municipio}  ",id="",className=""), 
+                                                html.H6(f"População : {populacao_municipio} Hab.",id="",className=""), 
+                                            ]),
+                                        ], className="d-flex justify-content-between "),
                                        ]),
                                 ],
                                 id="info-container",
@@ -109,7 +121,9 @@ def get_dados_municipio(value):
                             )
     
     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
-app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='/app/municipios/assets',  title="IGM/CFA - 2021")
+app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='D:\\municipios\\assets',  title="IGM/CFA - 2021")
+
+
 app.layout = html.Div([
                         custom_default,
                         html.Div([
@@ -138,7 +152,6 @@ app.layout = html.Div([
                                                             options=list(dict_municipios.keys()),
                                                             multi=False,
                                                             value='Palmas',
-                                                            
                                                         ),
                                                 ], className="w-100"), 
                                          ], id="dropdown_cidades", className="p-2 mb-2 container shadow  bg-body rounded d-flex"),
@@ -170,4 +183,5 @@ def info_hover(feature):
 def update_output_div(input_value):
     if feature is not None:
         return get_grafico_municipio(dict_municipios[input_value]), get_dados_municipio(dict_municipios[input_value])
+
 server = app.server
