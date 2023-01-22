@@ -170,4 +170,7 @@ def info_hover(feature):
 def update_output_div(input_value):
     if feature is not None:
         return get_grafico_municipio(dict_municipios[input_value]), get_dados_municipio(dict_municipios[input_value])
+
+
+
 server = app.server
