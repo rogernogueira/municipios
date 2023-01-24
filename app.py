@@ -189,7 +189,7 @@ def update_output_div(input_value):
         return get_grafico_municipio(dict_municipios[input_value]), get_dados_municipio(dict_municipios[input_value])
 
 # no servidor
-#server = app.server 
+server = app.server 
 
 
 #if __name__ == '__main__':
