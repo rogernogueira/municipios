@@ -12,7 +12,7 @@ from templates.menu import  custom_default
 import babel.numbers
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
-colorscale = ['#FFEDA0', '#FED976', '#FEB24C', '#FD8D3C', '#FC4E2A', '#E31A1C', '#BD0026', '#800026']
+colorscale = [ '#304d63','#ED8975', '#8fb9aa', '#FD8D3C', ]
 color_prop = 'IGM/CFA'
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 
@@ -48,8 +48,10 @@ for feature in geojson_municipios['features']:
  
 #colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min, max=max, unit=' IGM/CFA')
 
-classes = df_cidade_to[color_prop].quantile([0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]).tolist()    
-ctg = ["{}".format(cls, classes[i + 1])[:3] for i, cls in enumerate(classes[:-1])] + ["{}".format(classes[-1])[:3]]
+# classes = df_cidade_to[color_prop].quantile([0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]).tolist()    
+classes = (0,2.5,5,7.5,10)
+# ctg = ["{}".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}".format(classes[-1])]
+ctg = ['0-2.5', '2.5-5', '5-7.5', '7.5-10']
 colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=300, height=30, unit='IGM/CFA', position='bottomleft')
 
 
@@ -62,6 +64,7 @@ style_handle = assign("""function(feature, context){
             style.fillColor = colorscale[i];  // set the fill color according to the class
         }
     }
+  
     return style;
 }""")
 
@@ -122,6 +125,7 @@ def get_dados_municipio(value):
     
     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
 app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='/app/municipios/assets',  title="IGM/CFA - 2021")
+#app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='assets',  title="IGM/CFA - 2021")
 
 
 app.layout = html.Div([
@@ -184,4 +188,9 @@ def update_output_div(input_value):
     if feature is not None:
         return get_grafico_municipio(dict_municipios[input_value]), get_dados_municipio(dict_municipios[input_value])
 
-server = app.server
+# no servidor
+#server = app.server 
+
+
+#if __name__ == '__main__':
+#    app.run_server(debug=True)
