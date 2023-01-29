@@ -1,11 +1,14 @@
 
 import dash_bootstrap_components as dbc
-from dash import Input, Output, State, html
+from dash import Input, Output, State, html, dcc
+import dash
+
 
 PLOTLY_LOGO = "assets\ComaisLab.png"
 
-nav_item = dbc.NavItem(dbc.NavLink("Correlações", href="http://municipios.comais.uft.edu.br/tocantins.html"))
+nav_item = dbc.NavItem(dbc.NavLink("AutoCorrelação", href="http://municipios.comais.uft.edu.br/autocorrelations"))
 nav_item_comais = dbc.NavItem(dbc.NavLink("Comais Lab", href="http://www.comais.uft.edu.br/"))
+nav_item_home = dbc.NavItem(dbc.NavLink("Home", href="http://municipios.comais.uft.edu.br/"))
 
 # make a reuseable dropdown for the different examples
 dropdown = dbc.DropdownMenu(
@@ -19,16 +22,24 @@ dropdown = dbc.DropdownMenu(
     in_navbar=True,
     label="Menu",
 )
+
+
+
 custom_default = dbc.Navbar(
     dbc.Container(
         [
             dbc.Col( html.Img(src=PLOTLY_LOGO, height="35px")),
             dbc.NavbarBrand("Índice de Governança Municipal ", href="http://municipios.comais.uft.edu.br"),
             dbc.NavbarToggler(id="navbar-toggler1"),
+            dropdown,
+           
+
+
             dbc.Collapse(
                 dbc.Nav(
-                    [nav_item,nav_item_comais ], className="ms-auto", navbar=True
+                    [nav_item_home, nav_item,nav_item_comais ], className="ms-auto", navbar=True
                 ),
+            
                 id="navbar-collapse1",
                 navbar=True,
             ),
