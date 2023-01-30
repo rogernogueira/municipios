@@ -178,7 +178,7 @@ chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
     
 #     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
 app = Dash( suppress_callback_exceptions=True, 
-            name=__name__,
+            name='__name__',
             server=False,
             use_pages=True,
              pages_folder='pages',
