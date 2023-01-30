@@ -28,13 +28,10 @@ dropdown = dbc.DropdownMenu(
 custom_default = dbc.Navbar(
     dbc.Container(
         [
-            dbc.Col( html.Img(src=PLOTLY_LOGO, height="35px")),
+            dbc.Col( html.Img(src=PLOTLY_LOGO, height="40px")),
             dbc.NavbarBrand("Índice de Governança Municipal ", href="http://municipios.comais.uft.edu.br"),
             dbc.NavbarToggler(id="navbar-toggler1"),
-            dropdown,
-           
-
-
+ 
             dbc.Collapse(
                 dbc.Nav(
                     [nav_item_home, nav_item,nav_item_comais ], className="ms-auto", navbar=True

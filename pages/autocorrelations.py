@@ -121,6 +121,7 @@ def get_map_sig(df, color_prop, grupo):
 
     return  html.Div(children=[ 
             html.Div(children=[
+              html.H5('Mapa de Significância Espacial'),  
               dl.Map(center=[-9.407668341753798, -48.416790644617116], zoom=7, children=[
                                         dl.TileLayer(),
                                         dl.GeoJSON(data =geojson_municipios_filter, format="geojson", id="cidades_sig",
@@ -134,8 +135,9 @@ def get_map_sig(df, color_prop, grupo):
                                         info,  
                                         # geobuf resource (fastest option)
                                     ], style={'width': '100%', 'height': '80vh', 'margin': "auto", "display": "block"}, id="map_sig"), 
-            ], className='container shadow' ),
+            ], className='container shadow', style={'margin-top': '10px'}),
             html.Div(children=[    
+              html.H5('Mapa de Clusters'),
               dl.Map(center=[-9.407668341753798, -48.416790644617116], zoom=7, children=[
                                         dl.TileLayer(),
                                         dl.GeoJSON(data =geojson_municipios_filter, format="geojson", id="cidades_sig_cluster",
@@ -150,7 +152,7 @@ def get_map_sig(df, color_prop, grupo):
                                         info_cluster,  
                                         # geobuf resource (fastest option)
                                     ], style={'width': '100%', 'height': '80vh', 'margin': "auto", "display": "block"}, id="map_cluster"),  
-                ], className='container shadow' ),
+                ], className='container shadow  ', style={'margin-top': '10px'}),
     ], className = "d-flex justify-content-end")
 
 
