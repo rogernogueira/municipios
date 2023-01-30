@@ -96,7 +96,7 @@ def get_map(color_prop):
                                         colorbar, 
                                         info,  
                                         # geobuf resource (fastest option)
-                                    ], style={'width': '100%', 'height': '90vh', 'margin': "auto", "display": "block"}, id="map")
+                                    ], style={'width': '100%', 'height': '80vh', 'margin': "auto", "display": "block"}, id="map")
 
 def ranking_municipio_grupo(nome):
     cluster = df_tocantins_ano[df_tocantins_ano['nome'] == nome]['Cluster'].iloc[0]
