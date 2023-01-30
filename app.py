@@ -177,8 +177,8 @@ chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
 #                             )
     
 #     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
-#app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='/app/municipios/assets',  title="IGM/CFA - 2021")
-app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='assets',  title="IGM/CFA - 2021", use_pages=True, pages_folder='/app/municipios/pages')
+app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='/app/municipios/assets',  title="IGM/CFA - 2021", use_pages=True, pages_folder='/app/municipios/pages')
+#app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='assets',  title="IGM/CFA - 2021", use_pages=True, )
 
 
 app.layout = html.Div([
@@ -263,8 +263,8 @@ app.layout = html.Div([
 #     else:
 #         return "", ""
 # no servidor
-#server = app.server 
+server = app.server 
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
