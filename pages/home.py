@@ -229,7 +229,7 @@ layout = html.Div(children=[
                                                             value='IGM',
                                                         ),
                                     ], className="w-100"),             
-                                ], id="dropdown_indicador",className='p-2 mb-2 container shadow  bg-body rounded d-flex'),
+                                ], id="dropdown_indicador",className='p-2 mb-2 container  bg-body rounded d-flex'),
                                     
                                 html.Div([get_map("IGM")],id='layout_map', className="container" ),            
                                 ], className=" d-flex flex-column w-100"), 
@@ -244,7 +244,7 @@ layout = html.Div(children=[
                                                             value='PALMAS',
                                                         ),
                                                 ], className="w-100"), 
-                                         ], id="dropdown_cidades", className="p-2 mb-2 container shadow  bg-body rounded d-flex"),
+                                         ], id="dropdown_cidades", className="p-2 mb-2 container   bg-body rounded d-flex"),
                                 html.Div(id="grafico_igm", className="container"),
                                 html.Div(id="dados_municipio", className="container"),
                                 
