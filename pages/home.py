@@ -21,6 +21,7 @@ chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
 colorscale = [ '#304d63','#ED8975', '#8fb9aa', '#FD8D3C', ]
 color_prop = 'IGM'
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
+INDICADORES = ["IGM","Desempenho", "Finanças", "Gestão"]
 
 df_tocantins = pd.read_pickle('data/tocantins.pkl')
 #df_tocantins.rename(columns={'IGM/CFA':'IGM', 'Finanças - Dimensão':'Finanças','Gestão - Dimensão':'Gestão','Desempenho - Dimensão':'Desempenho'   }, inplace=True)
@@ -34,8 +35,15 @@ df_tocantins = pd.read_pickle('data/tocantins.pkl')
 df_tocantins_ano = pd.read_pickle('data/tocantins_2021.pkl')
 
 
-ranking_geral = df_tocantins_ano.sort_values(['IGM'],ascending=False )['nome'].tolist()
-ranking_geral = dict(zip(ranking_geral,range(1,len(ranking_geral)+1)))
+def get_ranking_geral():
+    ranking_geral = []
+    for i in INDICADORES:
+        df_ord = df_tocantins_ano.sort_values([i],ascending=False )['nome'].tolist()
+        dict_rank_indicador =   dict(zip(df_ord,range(1,len(df_ord)+1)))
+        ranking_geral.append(dict_rank_indicador)
+    return ranking_geral
+
+
 
 list_municipios = df_tocantins_ano[['nome','Código IBGE']].groupby('nome').first().reset_index()
 dict_municipios = dict(zip(list_municipios['nome'], list_municipios['Código IBGE']))
@@ -56,11 +64,9 @@ for feature in geojson_municipios['features']:
     for item in dict_cidade_to:
         if feature['properties']['id'] == str(item['codigo_ibge']):
             feature['properties']['tooltip'] = item['tooltip']
-            feature['properties']['IGM'] = item['IGM']
-            feature['properties']['Finanças'] = item['Finanças']
-            feature['properties']['Desempenho'] = item['Desempenho']
-            feature['properties']['Gestão'] = item['Gestão']
- 
+            for i in INDICADORES:
+                feature['properties'][i] = item[i]
+            
 #colorbar = dl.Colorbar(colorscale=colorscale, width=20, height=150, min=min, max=max, unit=' IGM/CFA')
 
 # classes = df_cidade_to[color_prop].quantile([0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]).tolist()    
@@ -84,7 +90,9 @@ style_handle = assign("""function(feature, context){
 }""")
 
 def get_map(color_prop):
-    return     dl.Map(center=[-9.407668341753798, -48.416790644617116], zoom=7, children=[
+    return html.Div([   
+    
+         dl.Map(center=[-9.407668341753798, -48.416790644617116], zoom=7, children=[
                                         dl.TileLayer(),
                                         dl.GeoJSON(data =geojson_municipios, format="geojson", id="cidades",
                                                     options=dict(style=style_handle),
@@ -96,13 +104,18 @@ def get_map(color_prop):
                                         colorbar, 
                                         info,  
                                         # geobuf resource (fastest option)
-                                    ], style={'width': '100%', 'height': '80vh', 'margin': "auto", "display": "block"}, id="map")
+                                    ], style={'width': '100%', 'height': '80vh', 'margin':'auto', "display": "block", }, id="map")
+    ], className="container shadow  bg-body rounded d-flex mt-1 ", style={'padding':'10px'})
 
 def ranking_municipio_grupo(nome):
     cluster = df_tocantins_ano[df_tocantins_ano['nome'] == nome]['Cluster'].iloc[0]
     list_cluster = df_tocantins_ano[df_tocantins_ano['Cluster'] == cluster].sort_values(['IGM'],ascending=False )['nome'].tolist()    
-    list_cluster = dict(zip(list_cluster,range(1,len(list_cluster)+1)))
-    return list_cluster[nome], cluster
+    list_incadores_cluster = []
+    for i in INDICADORES:
+        list_cluster = df_tocantins_ano[df_tocantins_ano['Cluster'] == cluster].sort_values([i],ascending=False )['nome'].tolist()
+        list_cluster = dict(zip(list_cluster,range(1,len(list_cluster)+1)))
+        list_incadores_cluster.append(list_cluster)
+    return cluster, list_incadores_cluster
     
 def get_info(feature=None, color_prop="IGM"):
     header = [html.H4(f"{color_prop} - 2021")]
@@ -148,55 +161,80 @@ def get_grafico_municipio(value, color_prop="IGM"):
             ], className="w-100")
     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex ")
 
+def get_indicadores_municipios(indicador_municipio,posicao_geral, list_rank_indicadores,grupo, nome_municipio  ):
+    result_indicadores = []
+    for indice in range(1,len(INDICADORES)):
+        result_indicadores.append( html.Div(
+                                                [
+                                                    html.Hr(),
+                                                    html.H6(f"{INDICADORES[indice]} :{indicador_municipio[indice]}",className="card-subtitle mb-2 text-muted"),
+                                                    html.Div([
+                                                        html.Div([
+                                                            html.H6(f"Posição no ranking TO : {posicao_geral[indice][nome_municipio]}º ",), 
+                                                            html.H6(f"Posição no {grupo} : {list_rank_indicadores[indice][nome_municipio]}º "), 
+                                                            ] ),
+                                                    ] , className="d-flex justify-content-between  container"),
+                                                ],id="list_rank_indicadores" ))
+    return result_indicadores
+
 def get_dados_municipio(value, color_prop="IGM"):
     df_result = df_tocantins[df_tocantins['Código IBGE'] == int(value)]
     nome_municipio  = df_result["nome"].iloc[0]
-    igm_municipio  = df_result[color_prop].iloc[0]
+    indicador_municipio  = [df_result[indicador].iloc[0] for indicador in INDICADORES]
     populacao_municipio  = df_result["Dados de Identificação/Demográficos - População"].iloc[0]
     populacao_municipio = babel.numbers.format_number(populacao_municipio, locale='pt_BR')
     pib_municipio  = df_result["Pib per capita 2020"].iloc[0]
     pib_municipio = babel.numbers.format_currency(pib_municipio, 'BRL', locale='pt_BR')
-    posicao_geral = ranking_geral[nome_municipio]
-    posicao_grupo, grupo = ranking_municipio_grupo(nome_municipio)   
-    layout_result =  html.Div(
-                                [
+    posicao_geral = get_ranking_geral()
+
+    grupo, list_rank_indicadores = ranking_municipio_grupo(nome_municipio)   
+    layout_result =  html.Div(id = "dados_municipio_detalhe", children=[
+                                
+                                   
                                     html.Div(
                                         [html.H5(f"{nome_municipio}",className="card-title"),
-                                        html.H6(f"{color_prop} :{igm_municipio}",className="card-subtitle mb-2 text-muted"),
+                                        html.H6(f"{INDICADORES[0]} :{indicador_municipio[0]}",className="card-subtitle mb-2 text-muted"),
                                         html.Div([
                                             html.Div([
-                                                html.H6(f"Posição no ranking TO : {posicao_geral}º ",id="",className=""), 
-                                                html.H6(f"Posição no {grupo} : {posicao_grupo}º ",id="",className=""), 
-                                            ]),
+                                                html.H6(f"Posição no ranking TO : {posicao_geral[0][nome_municipio]}º ",id="",className=""), 
+                                                html.H6(f"Posição no {grupo} : {list_rank_indicadores[0][nome_municipio]}º ",id="",className=""), 
+                                            ]), 
                                             html.Div([
                                                 html.H6(f"PIB : {pib_municipio}  ",id="",className=""), 
                                                 html.H6(f"População : {populacao_municipio} Hab.",id="",className=""), 
                                             ]),
-                                        ], className="d-flex justify-content-between "),
+                                        ], className="d-flex justify-content-between container"),
                                        ]),
+                                      
+                                            *get_indicadores_municipios(indicador_municipio,posicao_geral, list_rank_indicadores,grupo, nome_municipio),
+                                            
                                 ],
-                                id="info-container",
-                                className="container ",
+                                
+                                className="container d-grid",
                             )
     
-    return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
+    return html.Div([layout_result],id="lista_idicadores", className="container shadow  bg-body rounded d-flex mt-1 ")
 
 layout = html.Div(children=[
     html.Div( 
              html.Div([
-                        html.Div([      
-                                    html.Label("Indicador:"),    
-                                    dcc.Dropdown(
-                                                        id='select_indicador',
-                                                        options=['IGM', 'Finanças','Gestão','Desempenho'],
-                                                        multi=False,
-                                                        value='IGM',
-                                                    ),
-                                    html.Div([get_map("IGM")],id='layout_map' ),            
-                                ], id="dropdown_indicador",className='container shadow'),
+                        html.Div([ 
+                            html.Div([ 
+                                    html.Div([     
+                                        html.Label("Indicador:"),    
+                                        dcc.Dropdown(
+                                                            id='select_indicador',
+                                                            options=['IGM', 'Finanças','Gestão','Desempenho'],
+                                                            multi=False,
+                                                            value='IGM',
+                                                        ),
+                                    ], className="w-100"),             
+                                ], id="dropdown_indicador",className='p-2 mb-2 container shadow  bg-body rounded d-flex'),
+                                    
+                                html.Div([get_map("IGM")],id='layout_map', className="container" ),            
+                                ], className=" d-flex flex-column w-100"), 
                             html.Div([                             
                                 html.Div([
-                                    
                                            html.Div([      
                                            html.Label("Município:"),    
                                            dcc.Dropdown(

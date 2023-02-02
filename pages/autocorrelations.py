@@ -86,7 +86,7 @@ style_handle_cluster = assign("""function(feature, context){
 def get_map_sig(df, color_prop, grupo):
     classes=[0,1]
     ctg = ['Não Significante', 'Significante' ]
-    colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=300, height=30, unit='IGM', position='bottomright')
+    colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale[0:2], width=300, height=30, unit='IGM', position='bottomright')
     classes_cluster = [0,1,2,3,4]
     ctg_cluster = ['Não Significante', 'HH', 'LH','LL','HL']
     colorbar_cluster = dlx.categorical_colorbar(categories=ctg_cluster, colorscale=colorscale, height=30,width=300, unit='IGM', position='bottomright')
