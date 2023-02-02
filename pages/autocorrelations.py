@@ -26,7 +26,10 @@ def get_info(feature=None):
     if not feature:
         return header + [html.P("Passa o mouse sobre um município")]
     return header + [html.B(feature["properties"]["description"]), html.Br(),
-                     "{:.3f}".format(feature["properties"]['Índice de Moran'])]
+                     "I moran: {:.3f}".format(feature["properties"]['Índice de Moran']),
+                     html.Br(),
+                     "P-value: {:.3f}".format(feature["properties"]['p-value']),
+                     ]
     
 info = html.Div(children=get_info(), id="info_sig", className="info",
                  style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
@@ -112,8 +115,9 @@ def get_map_sig(df, color_prop, grupo):
     )# Use the index in the original data
     quadrantes = pd.Series(lisa.q, index=df_geo.index)
     df_geo['Índice de Moran'] = pd.Series(imoran, index=df_geo.index)
-    df_geo['p-value'] = labels# Recode 1 to "Significant and 0 to "Non-significant"
+    df_geo['Significancia'] = labels# Recode 1 to "Significant and 0 to "Non-significant"
     df_geo['quadrantes'] = quadrantes
+    df_geo['p-value'] = pd.Series(lisa.p_sim, index=df_geo.index)
     
     geojson_municipios_filter = df_geo.to_json()
     geojson_municipios_filter = json.loads(geojson_municipios_filter)
@@ -129,7 +133,7 @@ def get_map_sig(df, color_prop, grupo):
                                                     zoomToBounds=True,
                                                     zoomToBoundsOnClick=False,
                                                     hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray='')),
-                                                    hideout=dict(colorscale=colorscale, classes=classes, style=style, colorProp='p-value'),
+                                                    hideout=dict(colorscale=colorscale, classes=classes, style=style, colorProp='Significancia'),
                                                 ),  
                                         colorbar, 
                                         info,  
@@ -145,7 +149,7 @@ def get_map_sig(df, color_prop, grupo):
                                                     zoomToBounds=True,
                                                     zoomToBoundsOnClick=False,
                                                     hoverStyle=arrow_function(dict(weight=5, color='#666', dashArray='')),
-                                                    hideout=dict(colorscale=colorscale, classes=classes_cluster, style=style, colorProp='p-value'),
+                                                    hideout=dict(colorscale=colorscale, classes=classes_cluster, style=style, colorProp='Significancia'),
                                                     
                                                 ),  
                                         colorbar_cluster, 

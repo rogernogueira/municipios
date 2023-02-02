@@ -9,12 +9,16 @@ import geojson
 import plotly.express as px
 import plotly.graph_objects as go
 import dash
-
+import configparser
 from unidecode import unidecode
 from templates.menu import  custom_default
 import babel.numbers
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
+
+
+config=configparser.ConfigParser()
+config.read('config.ini')
 # colorscale = [ '#304d63','#ED8975', '#8fb9aa', '#FD8D3C', ]
 # color_prop = 'IGM'
 # style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
@@ -177,13 +181,16 @@ chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
 #                             )
     
 #     return html.Div([layout_result], className="container shadow  bg-body rounded d-flex mt-1 ")
-app = Dash( suppress_callback_exceptions=True, 
-            name=__name__,
-            use_pages=True,
-            pages_folder='pages',
-            routes_pathname_prefix='/',    
-            external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='/app/municipios/assets',
-            title="IGM/CFA - 2021", )
+if (config['DEFAULT']['Development'] == 'True'):
+    app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='assets',  title="IGM/CFA - 2021", use_pages=True, )
+else:
+    app = Dash( suppress_callback_exceptions=True, 
+                name=__name__,
+                use_pages=True,
+                pages_folder='pages',
+                routes_pathname_prefix='/',    
+                external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='/app/municipios/assets',
+                title="IGM/CFA - 2021", )
 #app = Dash( suppress_callback_exceptions=True, external_stylesheets=external_stylesheets, external_scripts=[chroma], prevent_initial_callbacks=True, assets_folder='assets',  title="IGM/CFA - 2021", use_pages=True, )
 
 
@@ -269,7 +276,10 @@ app.layout = html.Div([
 #     else:
 #         return "", ""
 # no servidor
-server = app.server 
+if config['DEFAULT']['Development'] == 'True':
+    app.run_server(debug=True)
+else:
+    server = app.server 
 
 
 # if __name__ == '__main__':
