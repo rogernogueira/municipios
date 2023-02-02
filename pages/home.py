@@ -210,8 +210,7 @@ def get_dados_municipio(value, color_prop="IGM"):
                                             
                                 ],
                                 
-                                className="container d-grid",
-                            )
+                                className="container d-grid", style={ 'height':'395px','overflow-y': 'scroll'})
     
     return html.Div([layout_result],id="lista_idicadores", className="container shadow  bg-body rounded d-flex mt-1 ")
 
@@ -246,7 +245,7 @@ layout = html.Div(children=[
                                                 ], className="w-100"), 
                                          ], id="dropdown_cidades", className="p-2 mb-2 container   bg-body rounded d-flex"),
                                 html.Div(id="grafico_igm", className="container"),
-                                html.Div(id="dados_municipio", className="container"),
+                                html.Div(id="dados_municipio", className="container", ),
                                 
                             ], className=" d-flex flex-column w-100")     
                         ],
