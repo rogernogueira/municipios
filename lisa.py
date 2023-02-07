@@ -36,6 +36,7 @@ for feature in geojson_municipios['features']:
             feature['properties']['Desempenho'] = item['Desempenho']
             feature['properties']['Gestão'] = item['Gestão']
             feature['properties']['Finanças'] = item['Finanças']
+            
 geojson.dump(geojson_municipios, open('data\\geo_municipios.json', 'w'))
 df_geo = gpd.GeoDataFrame.from_features(geojson_municipios['features'])
 df_geo.set_index('name', inplace=True)	

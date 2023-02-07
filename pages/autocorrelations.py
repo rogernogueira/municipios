@@ -15,10 +15,13 @@ chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js"
 colorscale = [ '#304d63','#ED8975', '#8fb9aa', '#FD8D3C','#8e0000' ]
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7) 
 dash.register_page(__name__)
-with open('data/geo_municipios.json', encoding='utf-8') as f:
-    geojson_municipios = geojson.load(f)
-df = gpd.GeoDataFrame.from_features(geojson_municipios['features'])
-df.set_index('name', inplace=True)	
+
+# with open('data/geo_municipios.json', encoding='utf-8') as f:
+#     geojson_municipios = geojson.load(f)
+# df = gpd.GeoDataFrame.from_features(geojson_municipios['features'])
+# df.set_index('name', inplace=True)	
+
+df=gpd.GeoDataFrame.from_file('data/geo_municipios.json', driver="GeoJSON")
 
 
 def get_info(feature=None):
@@ -167,7 +170,7 @@ layout = html.Div(children=[
                                     html.Label("Indicador:"),    
                                     dcc.Dropdown(
                                                         id='select_indicador_significancia',
-                                                        options=['IGM', 'Finanças','Gestão','Desempenho'],
+                                                        options=['IGM', 'Finanças','Gestão','Desempenho', 'População'],
                                                         multi=False,
                                                         value='IGM',
                                                     ),
@@ -184,7 +187,6 @@ layout = html.Div(children=[
 ],)
              
 ])
-
 
 @callback(
     Output(component_id="layout_map_sig", component_property='children'),

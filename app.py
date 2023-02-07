@@ -23,11 +23,11 @@ config.read('config.ini')
 # color_prop = 'IGM'
 # style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 
-# df_tocantins = pd.read_pickle('data/tocantins.pkl')
-# #df_tocantins.rename(columns={'IGM/CFA':'IGM', 'Finanças - Dimensão':'Finanças','Gestão - Dimensão':'Gestão','Desempenho - Dimensão':'Desempenho'   }, inplace=True)
-# #df_tocantins.to_pickle('data/tocantins.pkl')
+#df_tocantins = pd.read_pickle('data/tocantins.pkl')
+#df_tocantins.rename(columns={'IGM/CFA':'IGM', 'Finanças - Dimensão':'Finanças','Gestão - Dimensão':'Gestão','Desempenho - Dimensão':'Desempenho', "Dados de Identificação/Demográficos - População":'População'   }, inplace=True)
+# df_tocantins.to_pickle('data/tocantins.pkl')
 # # # ano de 2021
-# # df_tocantins_ano = df_tocantins[df_tocantins['ano'] == 2021][['nome', "Código IBGE","IGM/CFA",'Finanças - Dimensão','Gestão - Dimensão','Desempenho - Dimensão', 'Cluster']]	
+#df_tocantins_ano = df_tocantins[df_tocantins['ano'] == 2021][['nome', 'Cluster',INDICADORES,]]	
 # # df_tocantins_ano.rename(columns={'IGM/CFA':'IGM', 'Finanças - Dimensão':'Finanças','Gestão - Dimensão':'Gestão','Desempenho - Dimensão':'Desempenho'   }, inplace=True)
 
 # # #save to pickle

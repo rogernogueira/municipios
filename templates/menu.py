@@ -7,6 +7,7 @@ import dash
 PLOTLY_LOGO = "assets\ComaisLab.png"
 
 nav_item = dbc.NavItem(dbc.NavLink("AutoCorrelação", href="http://municipios.comais.uft.edu.br/autocorrelations"))
+nav_item_pop = dbc.NavItem(dbc.NavLink("População", href="http://municipios.comais.uft.edu.br/population"))
 nav_item_comais = dbc.NavItem(dbc.NavLink("Comais Lab", href="http://www.comais.uft.edu.br/"))
 nav_item_home = dbc.NavItem(dbc.NavLink("Home", href="http://municipios.comais.uft.edu.br/"))
 
@@ -34,7 +35,7 @@ custom_default = dbc.Navbar(
  
             dbc.Collapse(
                 dbc.Nav(
-                    [nav_item_home, nav_item,nav_item_comais ], className="ms-auto", navbar=True
+                    [nav_item_home, nav_item,nav_item_pop,nav_item_comais ], className="ms-auto", navbar=True
                 ),
             
                 id="navbar-collapse1",
