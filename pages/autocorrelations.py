@@ -10,6 +10,7 @@ import geojson
 import json
 import pandas as pd
 import configparser
+import babel.numbers
 
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
@@ -40,16 +41,19 @@ def get_info(feature=None):
                      ]
     
 info = html.Div(children=get_info(), id="info_sig", className="info",
-                 style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
+                 style={"position": "absolute", "top": "10px", "right": "10px", "zIndex": "1000"})
 def get_info_cluster(feature=None, color_prop="IGM"):
     header = [html.H4(f"{color_prop} - {ANO}")]
     if not feature:
         return header + [html.P("Passa o mouse sobre um município")]
+    if color_prop == "População":
+        return header + [html.B(feature["properties"]["description"]), html.Br(),
+                     "{}".format(babel.numbers.format_decimal(feature["properties"][color_prop], locale='pt_BR'))]
     return header + [html.B(feature["properties"]["description"]), html.Br(),
-                     "{:.3f}".format(feature["properties"][color_prop])]
+                     "{}".format(feature["properties"][color_prop])]
     
 info_cluster = html.Div(children=get_info_cluster(), id="info_sig_cluster", className="info",
-                 style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
+                 style={"position": "absolute", "top": "10px", "right": "10px", "zIndex": "1000"})
 
 style_handle = assign("""function(feature, context){
     const {classes, colorscale, style, colorProp} = context.props.hideout;  // get props from 
@@ -67,7 +71,7 @@ style_handle_cluster = assign("""function(feature, context){
     const {classes, colorscale, style, colorProp} = context.props.hideout;  // get props from hideout
     const value = feature.properties[colorProp];  // get value the determines the color
     const quad = feature.properties['quadrantes'];  // get value the determines the color
-    console.log('valorqua',quad);
+    
 
     if (value > 0) {
         if (quad == 1){
@@ -151,7 +155,7 @@ def get_map_sig(df, color_prop, grupo, tipo_grupo="Todos"):
                                         info,  
                                         # geobuf resource (fastest option)
                                     ], style={'width': '100%', 'height': '80vh', 'margin': "auto", "display": "block"}, id="map_sig"), 
-            ], className='container shadow', style={'margin-top': '10px'}),
+            ], className='container shadow', style={'marginTop': '10px'}),
             html.Div(children=[    
               html.H5('Mapa de Clusters'),
               dl.Map(center=[-9.407668341753798, -48.416790644617116], zoom=7, children=[
@@ -168,7 +172,7 @@ def get_map_sig(df, color_prop, grupo, tipo_grupo="Todos"):
                                         info_cluster,  
                                         # geobuf resource (fastest option)
                                     ], style={'width': '100%', 'height': '80vh', 'margin': "auto", "display": "block"}, id="map_cluster"),  
-                ], className='container shadow  ', style={'margin-top': '10px'}),
+                ], className='container shadow  ', style={'marginTop': '10px'}),
     ], className = "d-flex justify-content-end")
 
 
@@ -187,46 +191,51 @@ layout = html.Div(children=[
                                     dcc.RadioItems(
                                         [{ "label": html.Div(
                                                     [
-                                                        html.Div("Todos", style={'font-size': 15, 'padding-left': 3}),
-                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                        html.Div("Todos", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
                                                 ),
                                                 "value": "Todos",
                                             },
                                          { "label": html.Div(
                                                     [
-                                                        html.Div("CFA", style={'font-size': 15, 'padding-left': 3}),
-                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                        html.Div("CFA", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
                                                 ),
                                                 "value": "CFA",
                                             },
                                          { "label": html.Div(
                                                     [
-                                                        html.Div("Mesorregião", style={'font-size': 15, 'padding-left': 3}),
-                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                        html.Div("Mesorregião", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
                                                 ),
                                                 "value": "Mesorregião",
                                             },
                                          {"label": html.Div(
                                                     [
-                                                        html.Div("Microrregião", style={'font-size': 15, 'padding-left': 3}),
-                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                        html.Div("Microrregião", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
                                                 ),
                                                 "value": "Microrregião",
                                             }
                                          ],
-                                         id = 'radio_grupo_significancia',  value='Todos', style = {'border':'1px solid #ccc', 'border-radius':'5px', 'padding':'1px', 'margin':'5px'}, labelStyle={'padding':'5px' }, inline=True), 
+                                         id = 'radio_grupo_significancia',  value='Todos', style = {'border':'1px solid #ccc', 'borderRadius':'5px', 'padding':'1px', 'margin':'5px'}, labelStyle={'padding':'5px' }, inline=True), 
                                     html.Label("Grupo de municípios:"), 
                                     dcc.Dropdown(   
                                                         id='select_grupo_significancia',
                                                         options=['Todos'],
                                                         multi=False,
                                                         value='Todos',
+                                                        className= 'dropdown',
+                                                        style={
+                                                                'position': 'relative',
+                                                                'zIndex': '99999',
+                                                            }, 
                                                     ),
                                     html.Div([get_map_sig(df, "IGM", "Todos")],id='layout_map_sig' ),            
                                 ], id="dropdown_indicador",className='container shadow'),
                                                              
 ],)
-             
+            
 ])
 
 @callback(Output('select_grupo_significancia', 'options'),

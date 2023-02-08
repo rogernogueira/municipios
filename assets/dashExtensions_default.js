@@ -24,7 +24,7 @@ window.dashExtensions = Object.assign({}, window.dashExtensions, {
             } = context.props.hideout; // get props from hideout
             const value = feature.properties[colorProp]; // get value the determines the color
             const quad = feature.properties['quadrantes']; // get value the determines the color
-            console.log('valorqua', quad);
+
 
             if (value > 0) {
                 if (quad == 1) {
