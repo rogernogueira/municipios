@@ -56,7 +56,7 @@ def get_ranking_geral():
 classes = (0,2.5,5,7.5,10)
 # ctg = ["{}".format(cls, classes[i + 1]) for i, cls in enumerate(classes[:-1])] + ["{}".format(classes[-1])]
 ctg = ['0-2.5', '2.5-5', '5-7.5', '7.5-10']
-colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=300, height=30, unit='IGM', position='bottomleft')
+colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale[0:4], width=300, height=30, unit='IGM', position='bottomleft')
 
 
 
