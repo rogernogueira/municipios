@@ -12,7 +12,10 @@ INDICADORES = config['DEFAULT']['Indicadores'].split(',')
 SIGLA_ESTADO = config['DEFAULT']['SIGLA_ESTADO']
 
 df = pd.read_excel('data\\Base2022.xlsx')
+df_regioes = pd.read_excel('data/regionalizacao.xlsx')
 df = df[df['estado (sigla)'] == SIGLA_ESTADO]
+df = df.merge(df_regioes, on='Código IBGE', how='left')                                                
+
 df.rename(columns={
     'IGM/CFA':'IGM',
     'Finanças - Dimensão':'Finanças',
@@ -33,6 +36,9 @@ for feature in geojson_municipios['features']:
             feature['properties']['tooltip'] = row['nome']
             feature['properties']['Mesorregião'] = row['Mesorregião']
             feature['properties']['Microrregião'] = row['Microrregião']
+            feature['properties']['Intermediária'] = row['Intermediária']
+            feature['properties']['Imediata'] = row['Imediata']
+            
 
             feature['properties']['Cluster'] = row['Cluster']  
             for i in INDICADORES:

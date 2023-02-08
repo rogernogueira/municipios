@@ -111,6 +111,10 @@ def get_map_sig(df, color_prop, grupo, tipo_grupo="Todos"):
         df_geo = df[df['Mesorregião']==grupo].copy()
     if tipo_grupo == 'Microrregião':
         df_geo = df[df['Microrregião']==grupo].copy()
+    if tipo_grupo == 'Intermediária':
+        df_geo = df[df['Intermediária']==grupo].copy()
+    if tipo_grupo == 'Imediata':
+        df_geo = df[df['Imediata']==grupo].copy()
     # w_queen
     w_queen = Queen.from_dataframe(df_geo,silence_warnings=True)        
         #lista de ilhas
@@ -216,6 +220,20 @@ layout = html.Div(children=[
                                                     ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
                                                 ),
                                                 "value": "Microrregião",
+                                            },
+                                         {"label": html.Div(
+                                                    [
+                                                        html.Div("Intermediária", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
+                                                ),
+                                                "value": "Intermediária",
+                                            },
+                                         {"label": html.Div(
+                                                    [
+                                                        html.Div("Imediata", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
+                                                ),
+                                                "value": "Imediata",
                                             }
                                          ],
                                          id = 'radio_grupo_significancia',  value='Todos', style = {'border':'1px solid #ccc', 'borderRadius':'5px', 'padding':'1px', 'margin':'5px'}, labelStyle={'padding':'5px' }, inline=True), 
@@ -251,6 +269,10 @@ def choice_group(value):
         return [{'label': i, 'value': i} for i in df['Mesorregião'].unique()],df['Mesorregião'].unique()[0] 
     elif value == 'Microrregião':
         return [{'label': i, 'value': i} for i in df['Microrregião'].unique()], df['Microrregião'].unique()[0]
+    elif value == 'Intermediária':
+        return [{'label': i, 'value': i} for i in df['Intermediária'].unique()], df['Intermediária'].unique()[0]
+    elif value == 'Imediata':
+        return [{'label': i, 'value': i} for i in df['Imediata'].unique()], df['Imediata'].unique()[0]
     return []
 
 @callback(
