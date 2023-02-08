@@ -28,6 +28,7 @@ config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
 
 INDICADORES = config['DEFAULT']['Indicadores'].split(',')
+ANO = int(config['DEFAULT']['ANO'])
 
 df_tocantins = pd.read_pickle('data/df_tocantins.pkl')
 
@@ -100,7 +101,7 @@ def ranking_municipio_grupo(nome):
     return cluster, list_incadores_cluster
     
 def get_info(feature=None, color_prop="IGM"):
-    header = [html.H4(f"{color_prop} - 2021")]
+    header = [html.H4(f"{color_prop} - {ANO}")]
     if not feature:
         return header + [html.P("Passa o mouse sobre um município")]
     return header + [html.B(feature["properties"]["nome"]), html.Br(),
@@ -165,7 +166,7 @@ def get_dados_municipio(value, color_prop="IGM"):
     indicador_municipio  = [df_result[indicador].iloc[0] for indicador in INDICADORES]
     populacao_municipio  = df_result["População"].iloc[0]
     populacao_municipio = babel.numbers.format_number(populacao_municipio, locale='pt_BR')
-    pib_municipio  = df_result["Pib per capita 2020"].iloc[0]
+    pib_municipio  = df_result["Pib per capita"].iloc[0]
     pib_municipio = babel.numbers.format_currency(pib_municipio, 'BRL', locale='pt_BR')
     posicao_geral = get_ranking_geral()
 

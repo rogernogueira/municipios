@@ -1,7 +1,7 @@
 import dash
 import dash_leaflet as dl
 import dash_leaflet.express as dlx
-from dash import html, dcc, callback, Input, Output
+from dash import html, dcc, callback, Input, Output, State
 import geopandas as gpd
 from dash_extensions.javascript import assign,arrow_function
 from libpysal.weights import Queen
@@ -9,10 +9,10 @@ import esda
 import geojson
 import json
 import pandas as pd
+import configparser
 
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
-colorscale = [ '#304d63','#ED8975', '#8fb9aa', '#FD8D3C','#8e0000' ]
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7) 
 dash.register_page(__name__)
 
@@ -21,11 +21,16 @@ dash.register_page(__name__)
 # df = gpd.GeoDataFrame.from_features(geojson_municipios['features'])
 # df.set_index('name', inplace=True)	
 
+config = configparser.ConfigParser()
+config.read('config.ini', encoding='utf-8')
+ANO = int(config['DEFAULT']['ANO'])
+colorscale = config['DEFAULT']['COLORSCALE'].split(',')
+
 df=gpd.GeoDataFrame.from_file('data/geo_municipios.json', driver="GeoJSON")
 
 
 def get_info(feature=None):
-    header = [html.H4(f"Índice de Moran - 2021")]
+    header = [html.H4(f"Índice de Moran - {ANO}")]
     if not feature:
         return header + [html.P("Passa o mouse sobre um município")]
     return header + [html.B(feature["properties"]["description"]), html.Br(),
@@ -37,7 +42,7 @@ def get_info(feature=None):
 info = html.Div(children=get_info(), id="info_sig", className="info",
                  style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
 def get_info_cluster(feature=None, color_prop="IGM"):
-    header = [html.H4(f"{color_prop} - 2021")]
+    header = [html.H4(f"{color_prop} - {ANO}")]
     if not feature:
         return header + [html.P("Passa o mouse sobre um município")]
     return header + [html.B(feature["properties"]["description"]), html.Br(),
@@ -86,7 +91,7 @@ style_handle_cluster = assign("""function(feature, context){
 
 
 
-def get_map_sig(df, color_prop, grupo):
+def get_map_sig(df, color_prop, grupo, tipo_grupo="Todos"):
     classes=[0,1]
     ctg = ['Não Significante', 'Significante' ]
     colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale[0:2], width=300, height=30, unit='IGM', position='bottomright')
@@ -94,10 +99,14 @@ def get_map_sig(df, color_prop, grupo):
     ctg_cluster = ['Não Significante', 'HH', 'LH','LL','HL']
     colorbar_cluster = dlx.categorical_colorbar(categories=ctg_cluster, colorscale=colorscale, height=30,width=300, unit='IGM', position='bottomright')
 
-    if grupo == 'Todos':
+    if tipo_grupo == 'Todos':
         df_geo = df.copy()
-    else:
+    if tipo_grupo == 'CFA':
         df_geo = df[df['Cluster']==grupo].copy()
+    if tipo_grupo == 'Mesorregião':
+        df_geo = df[df['Mesorregião']==grupo].copy()
+    if tipo_grupo == 'Microrregião':
+        df_geo = df[df['Microrregião']==grupo].copy()
     # w_queen
     w_queen = Queen.from_dataframe(df_geo,silence_warnings=True)        
         #lista de ilhas
@@ -174,10 +183,42 @@ layout = html.Div(children=[
                                                         multi=False,
                                                         value='IGM',
                                                     ),
+                                    html.Label("Grupos:"),
+                                    dcc.RadioItems(
+                                        [{ "label": html.Div(
+                                                    [
+                                                        html.Div("Todos", style={'font-size': 15, 'padding-left': 3}),
+                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                ),
+                                                "value": "Todos",
+                                            },
+                                         { "label": html.Div(
+                                                    [
+                                                        html.Div("CFA", style={'font-size': 15, 'padding-left': 3}),
+                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                ),
+                                                "value": "CFA",
+                                            },
+                                         { "label": html.Div(
+                                                    [
+                                                        html.Div("Mesorregião", style={'font-size': 15, 'padding-left': 3}),
+                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                ),
+                                                "value": "Mesorregião",
+                                            },
+                                         {"label": html.Div(
+                                                    [
+                                                        html.Div("Microrregião", style={'font-size': 15, 'padding-left': 3}),
+                                                    ], style={'display': 'inline-block', 'align-items': 'center', 'justify-content': 'center'}
+                                                ),
+                                                "value": "Microrregião",
+                                            }
+                                         ],
+                                         id = 'radio_grupo_significancia',  value='Todos', style = {'border':'1px solid #ccc', 'border-radius':'5px', 'padding':'1px', 'margin':'5px'}, labelStyle={'padding':'5px' }, inline=True), 
                                     html.Label("Grupo de municípios:"), 
                                     dcc.Dropdown(   
                                                         id='select_grupo_significancia',
-                                                        options=['Grupo 1', 'Grupo 2','Todos',],
+                                                        options=['Todos'],
                                                         multi=False,
                                                         value='Todos',
                                                     ),
@@ -188,13 +229,29 @@ layout = html.Div(children=[
              
 ])
 
+@callback(Output('select_grupo_significancia', 'options'),
+         Output('select_grupo_significancia', 'value'),
+                [Input('radio_grupo_significancia', 'value')],
+            )
+def choice_group(value):
+    if value == 'Todos':
+        return ['Todos'], 'Todos' 
+    elif value == 'CFA':
+        return [{'label': 'Grupo 1 - CFA', 'value': 'Grupo 1'},{'label': 'Grupo 2 - CFA', 'value':'Grupo 2'}], 'Grupo 1'
+    elif value == 'Mesorregião':
+        return [{'label': i, 'value': i} for i in df['Mesorregião'].unique()],df['Mesorregião'].unique()[0] 
+    elif value == 'Microrregião':
+        return [{'label': i, 'value': i} for i in df['Microrregião'].unique()], df['Microrregião'].unique()[0]
+    return []
+
 @callback(
     Output(component_id="layout_map_sig", component_property='children'),
-    Input('select_indicador_significancia','value'),
-    Input('select_grupo_significancia','value')
+    [Input('select_indicador_significancia','value'),
+     Input('select_grupo_significancia','value'),],
+    [State('radio_grupo_significancia', 'value')]
 )
-def update_city_selected_sig(value_indicador, value_grupo):
-    return get_map_sig(df,value_indicador, value_grupo)
+def update_city_selected_sig(value_indicador, value_grupo, value_radio):
+    return get_map_sig(df,value_indicador, value_grupo, value_radio)
 
 @callback(Output("info_sig", "children"),
                [Input("cidades_sig", "hover_feature"), 

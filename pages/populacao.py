@@ -18,12 +18,13 @@ import configparser
 dash.register_page(__name__, path='/population', name='População')
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
-colorscale = px.colors.sequential.Viridis_r
+#colorscale = px.colors.sequential.Viridis_r
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 config = configparser.ConfigParser()
 config.read('config.ini', encoding='utf-8')
 INDICADORES = config['DEFAULT']['Indicadores'].split(',')
-
+ANO = int(config['DEFAULT']['ANO'])
+colorscale = config['DEFAULT']['COLORSCALE'].split(',')
 df_tocantins = pd.read_pickle('data/df_tocantins.pkl')
 
 gpd_municipios=gpd.GeoDataFrame.from_file('data/geo_municipios.json', driver="GeoJSON")
@@ -41,8 +42,8 @@ def get_ranking_geral():
     return ranking_geral
 
 
-classes = gpd_municipios['População'].quantile([0, 0.125, 0.25, 0.375, 0.5, 0.625, 0.75, 0.875]).apply(lambda x: int(x)).tolist()    
-ctg = [f'{babel.numbers.format_decimal(classes[i], locale="pt_BR",decimal_quantization=False)} - {babel.numbers.format_decimal(classes[i+1], locale="pt_BR",decimal_quantization=False)}' for i in range(len(classes)-1)]
+classes = gpd_municipios['População'].quantile([0,  0.25,  0.5,  0.75, 0.875]).apply(lambda x: int(x)).tolist()    
+ctg = [f'{babel.numbers.format_decimal(classes[i], locale="pt_BR",decimal_quantization=False)} - {babel.numbers.format_decimal(classes[i+1], locale="pt_BR",decimal_quantization=False)}' for i in range(len(classes)-1)] +[f' > {babel.numbers.format_decimal(classes[-1], locale="pt_BR",decimal_quantization=False)}']
 colorbar = dlx.categorical_colorbar(categories=ctg, colorscale=colorscale, width=600, height=30, 
 unit='Hab', position='bottomleft')
 
@@ -92,11 +93,11 @@ def ranking_municipio_grupo(nome):
     return cluster, list_incadores_cluster
     
 def get_info(feature=None, color_prop="População"):
-    header = [html.H4(f"{color_prop} - 2021")]
+    header = [html.H4(f"{color_prop} - {ANO}")]
     if not feature:
         return header + [html.P("Passa o mouse sobre um município")]
     return header + [html.B(feature["properties"]["nome"]), html.Br(),
-                     "{:.3f}".format(feature["properties"][color_prop])]
+                     "{}".format(babel.numbers.format_decimal(feature["properties"][color_prop],  locale="pt_BR"))]
 info = html.Div(children=get_info(), id="info_pop", className="info",
                 style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
 
@@ -150,7 +151,7 @@ def get_dados_municipio(value, color_prop="IGM"):
     indicador_municipio  = [df_result[indicador].iloc[0] for indicador in INDICADORES]
     populacao_municipio  = df_result["População"].iloc[0]
     populacao_municipio = babel.numbers.format_number(populacao_municipio, locale='pt_BR')
-    pib_municipio  = df_result["Pib per capita 2020"].iloc[0]
+    pib_municipio  = df_result["Pib per capita"].iloc[0]
     pib_municipio = babel.numbers.format_currency(pib_municipio, 'BRL', locale='pt_BR')
     posicao_geral = get_ranking_geral()
 
@@ -198,7 +199,8 @@ layout = html.Div(children=[
                                 ], id="dropdown_indicador",className='p-2 mb-2 container  bg-body rounded d-flex'),
                                     
                                 html.Div([get_map("População")],id='layout_map_pop', className="container" ),            
-                                ], className=" d-flex flex-column w-100"), 
+                                ], className=" d-flex flex-column w-100"),
+                                 
                             html.Div([                             
                                 html.Div([
                                            html.Div([      
@@ -252,3 +254,5 @@ def update_output_div_pop(input_value, color_prop="IGM",):
         return get_grafico_municipio(input_value,color_prop), get_dados_municipio(input_value,color_prop)
     else:
         return "", ""
+
+
