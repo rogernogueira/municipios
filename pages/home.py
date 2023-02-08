@@ -20,7 +20,6 @@ import geopandas as gpd
 dash.register_page(__name__, path='/')
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
-colorscale = [ '#304d63','#ED8975', '#8fb9aa', '#FD8D3C', ]
 color_prop = 'IGM'
 style = dict(weight=2, opacity=1, color='white', dashArray='3', fillOpacity=0.7)
 
@@ -29,6 +28,7 @@ config.read('config.ini', encoding='utf-8')
 
 INDICADORES = config['DEFAULT']['Indicadores'].split(',')
 ANO = int(config['DEFAULT']['ANO'])
+colorscale = config['DEFAULT']['COLORSCALE'].split(',')
 
 df_tocantins = pd.read_pickle('data/df_tocantins.pkl')
 
