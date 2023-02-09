@@ -191,7 +191,7 @@ layout = html.Div(children=[
                                                         multi=False,
                                                         value='IGM',
                                                     ),
-                                    html.Label("Grupos:"),
+                                    html.Label("Tipo Região:"),
                                     dcc.RadioItems(
                                         [{ "label": html.Div(
                                                     [
@@ -237,7 +237,7 @@ layout = html.Div(children=[
                                             }
                                          ],
                                          id = 'radio_grupo_significancia',  value='Todos', style = {'border':'1px solid #ccc', 'borderRadius':'5px', 'padding':'1px', 'margin':'5px'}, labelStyle={'padding':'5px' }, inline=True), 
-                                    html.Label("Grupo de municípios:"), 
+                                    html.Label("Região:"), 
                                     dcc.Dropdown(   
                                                         id='select_grupo_significancia',
                                                         options=['Todos'],

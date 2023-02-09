@@ -72,12 +72,13 @@ style_handle = assign("""function(feature, context){
     return style;
 }""")
 
-def get_map(color_prop):
+def get_map(color_prop, geojson_municipios_tmp):
+    
     return html.Div([   
     
          dl.Map(center=[-9.407668341753798, -48.416790644617116], zoom=7, children=[
                                         dl.TileLayer(),
-                                        dl.GeoJSON(data =geojson_municipios, format="geojson", id="cidades",
+                                        dl.GeoJSON(data =geojson_municipios_tmp, format="geojson", id="cidades",
                                                     options=dict(style=style_handle),
                                                     zoomToBounds=True,
                                                     zoomToBoundsOnClick=False,
@@ -107,7 +108,7 @@ def get_info(feature=None, color_prop="IGM"):
     return header + [html.B(feature["properties"]["nome"]), html.Br(),
                      "{:.3f}".format(feature["properties"][color_prop])]
 info = html.Div(children=get_info(), id="info", className="info",
-                style={"position": "absolute", "top": "10px", "right": "10px", "z-index": "1000"})
+                style={"position": "absolute", "top": "10px", "right": "10px", "zIndex": "1000"})
 
 
 def get_grafico_municipio(value, color_prop="IGM"):
@@ -169,7 +170,6 @@ def get_dados_municipio(value, color_prop="IGM"):
     pib_municipio  = df_result["Pib per capita"].iloc[0]
     pib_municipio = babel.numbers.format_currency(pib_municipio, 'BRL', locale='pt_BR')
     posicao_geral = get_ranking_geral()
-
     grupo, list_rank_indicadores = ranking_municipio_grupo(nome_municipio)   
     layout_result =  html.Div(id = "dados_municipio_detalhe", children=[
                                 
@@ -192,7 +192,7 @@ def get_dados_municipio(value, color_prop="IGM"):
                                             
                                 ],
                                 
-                                className="container d-grid", style={ 'height':'395px','overflow-y': 'scroll'})
+                                className="container d-grid", style={ 'height':'395px','overflowY': 'scroll'})
     
     return html.Div([layout_result],id="lista_idicadores", className="container shadow  bg-body rounded d-flex mt-1 ")
 
@@ -209,10 +209,46 @@ layout = html.Div(children=[
                                                             multi=False,
                                                             value='IGM',
                                                         ),
-                                    ], className="w-100"),             
-                                ], id="dropdown_indicador",className='p-2 mb-2 container  bg-body rounded d-flex'),
+                                         html.Label("Tipo Região:"),                 
+                                         dcc.RadioItems(
+                                        [{ "label": html.Div(
+                                                    [
+                                                        html.Div("Todos", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
+                                                ),
+                                                "value": "Todos",
+                                            },
                                     
-                                html.Div([get_map("IGM")],id='layout_map', className="container" ),            
+                                         {"label": html.Div(
+                                                    [
+                                                        html.Div("Intermediária", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
+                                                ),
+                                                "value": "Intermediária",
+                                            },
+                                         {"label": html.Div(
+                                                    [
+                                                        html.Div("Imediata", style={'fontSize': 15, 'paddingLeft': 3}),
+                                                    ], style={'display': 'inline-block', 'alignItems': 'center', 'justifyContent': 'center'}
+                                                ),
+                                                "value": "Imediata",
+                                            },
+                                         ],
+                                         
+                                         id = 'radio_tipo_regiao',  value='Todos', style = {'border':'1px solid #ccc', 'borderRadius':'5px', 'padding':'1px', 'margin':'5px'}, labelStyle={'padding':'5px' }, inline=True),
+                                    ], className=""), 
+
+                                    html.Label("Região:"),    
+                                        dcc.Dropdown(
+                                                            id='select_regiao',
+                                                            options=['IGM', 'Finanças','Gestão','Desempenho'],
+                                                            multi=False,
+                                                            value='IGM',
+                                                        ),
+
+                                ], id="dropdown_indicador",className='p-3 mb-3 container  bg-body rounded d-flex flex-column'),
+                                    
+                                html.Div([get_map("IGM", geojson_municipios)],id='layout_map', className="container" ),            
                                 ], className=" d-flex flex-column w-100"), 
                             html.Div([                             
                                 html.Div([
@@ -238,9 +274,31 @@ layout = html.Div(children=[
 
 @callback(
     Output("layout_map", "children"), 
-    [Input("select_indicador", "value")])
-def map_indicador(input_value):
-        return get_map(input_value)
+    Output("select_municipio", "options"),
+    
+
+    [Input("select_indicador", "value"),
+    Input("radio_tipo_regiao", "value"), 
+    Input("select_regiao", "value"), 
+    ])
+    
+def map_indicador(input_value, tipo_regiao, regiao):
+    #geojson_municipios_tmp = 
+    if tipo_regiao == "Todos":
+        #geojson_municipios = geojson.loads(gpd_municipios.to_json())
+        return get_map(input_value,geojson_municipios),gpd_municipios['nome'].unique().tolist(), 
+        
+    if tipo_regiao == "Intermediária":
+        df_result = gpd_municipios[gpd_municipios['Intermediária'] == regiao ].copy()
+        geojson_municipios_tmp = geojson.loads(df_result.to_json())
+        return get_map(input_value,geojson_municipios_tmp),df_result['nome'].unique().tolist(), 
+    
+    if tipo_regiao == "Imediata":
+        df_result = gpd_municipios[gpd_municipios['Imediata'] == regiao ].copy()
+        geojson_municipios_tmp = geojson.loads(df_result.to_json())
+        return get_map(input_value,geojson_municipios_tmp),df_result['nome'].unique().tolist(), 
+        
+        
 
 @callback(
     Output("select_municipio", "value"), 
@@ -270,3 +328,18 @@ def update_output_div(input_value, color_prop="IGM",):
         return get_grafico_municipio(input_value,color_prop), get_dados_municipio(input_value, color_prop)
     else:
         return "", ""
+
+@callback(
+    Output("select_regiao", "options"),
+    [Input("radio_tipo_regiao", "value")],
+    )
+def update_regiao(input_value):
+    if input_value == "Todos":
+        return [{'label': 'Todas', 'value': 'Todas'}]
+    if input_value == "Intermediária":
+        return gpd_municipios['Intermediária'].unique().tolist()
+    if input_value == "Imediata":
+        return gpd_municipios['Imediata'].unique().tolist()
+
+
+
