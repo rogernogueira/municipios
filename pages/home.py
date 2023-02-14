@@ -15,8 +15,6 @@ import babel.numbers
 import configparser
 import geopandas as gpd
 
-
-
 dash.register_page(__name__, path='/')
 external_stylesheets = ['https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/css/bootstrap.min.css']
 chroma = "https://cdnjs.cloudflare.com/ajax/libs/chroma-js/2.1.0/chroma.min.js" 
