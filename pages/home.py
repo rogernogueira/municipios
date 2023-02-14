@@ -111,6 +111,51 @@ info = html.Div(children=get_info(), id="info", className="info",
                 style={"position": "absolute", "top": "10px", "right": "10px", "zIndex": "1000"})
 
 
+def get_grafico_regiao(indicador,regiao,tipo_regiao):
+    
+    if not tipo_regiao =="Todos":
+        df_result = df_tocantins[df_tocantins[tipo_regiao] == regiao]
+    else:
+        df_result = df_tocantins
+# calula a média dos indicadores por ano
+    df_result = df_result.groupby(['ano']).mean().reset_index()
+    fig = go.Figure()
+    fig.add_trace(go.Scatter(x=df_result['ano'], y=df_result['IGM'],
+                        mode='lines+markers',
+                        name='IGM'))
+    fig.add_trace(go.Scatter(x=df_result['ano'], y=df_result['Desempenho'],
+                        mode='lines+markers',
+                        name='Desempenho'))
+    fig.add_trace(go.Scatter(x=df_result['ano'], y=df_result['Finanças'],
+                        mode='lines+markers', name='Finanças'))
+    
+    fig.add_trace(go.Scatter(x=df_result['ano'], y=df_result['Gestão'],
+                        mode='lines+markers', name='Gestão'))
+    if regiao == "Todos":
+        fig.update_layout(title=f'Indicadores da região Tocantins',
+                   xaxis_title='Ano',
+                   yaxis_title='Valor do indicador')
+    else:    
+        fig.update_layout(title=f'Indicadores da região {regiao}',
+                   xaxis_title='Ano',
+                   yaxis_title='Valor do indicador')
+    annotations = []
+    annotations.append(dict(xref='paper', yref='paper', x=0.4, y=-0.2,
+                              xanchor='left', yanchor='top',
+                              text='Fonte: https://igm.cfa.org.br/',
+                              font=dict(family='Arial',
+                                        size=12,
+                                        color='rgb(150,150,150)'),
+                              showarrow=False))
+
+    fig.update_layout(annotations=annotations)
+
+    #fig = px.line(df_result, x="ano", y=color_prop, markers=True, title=f'Índice {color_prop} - {df_result[7"nome"].iloc[0]}')        
+    layout_result = html.Div([
+            dcc.Graph(figure=fig, id="graph_regiao"),            
+            ], className="w-100")
+    return html.Div([layout_result],id="div_graph_regiao", className="container shadow  bg-body rounded d-flex ")
+
 def get_grafico_municipio(value, color_prop="IGM"):
     df_result = df_tocantins[df_tocantins['nome'] == value]
     fig = go.Figure()
@@ -243,7 +288,7 @@ layout = html.Div(children=[
                                                             id='select_regiao',
                                                             options=['IGM', 'Finanças','Gestão','Desempenho'],
                                                             multi=False,
-                                                            value='IGM',
+                                                            
                                                         ),
 
                                 ], id="dropdown_indicador",className='p-3 mb-3 container  bg-body rounded d-flex flex-column'),
@@ -258,11 +303,12 @@ layout = html.Div(children=[
                                                             id='select_municipio',
                                                             options=gpd_municipios['nome'].unique().tolist(),
                                                             multi=False,
-                                                            value='Palmas',
+                                                            value='',
                                                         ),
                                                 ], className="w-100"), 
                                          ], id="dropdown_cidades", className="p-2 mb-2 container   bg-body rounded d-flex"),
                                 html.Div(id="grafico_igm", className="container"),
+                                html.Div(id="grafico_regiao", className="container"),
                                 html.Div(id="dados_municipio", className="container", ),
                                 
                             ], className=" d-flex flex-column w-100")     
@@ -275,28 +321,44 @@ layout = html.Div(children=[
 @callback(
     Output("layout_map", "children"), 
     Output("select_municipio", "options"),
-    
+    Output("grafico_regiao", "children"),
 
     [Input("select_indicador", "value"),
     Input("radio_tipo_regiao", "value"), 
     Input("select_regiao", "value"), 
-    ])
+    ],
+    State("select_municipio", "value"),
+    )
     
-def map_indicador(input_value, tipo_regiao, regiao):
+def map_indicador(indicador, tipo_regiao, regiao, municipios):
+    print('Tipo regiao: ',tipo_regiao)
+    print('regiao: ',regiao)
+    print(municipios)
     #geojson_municipios_tmp = 
     if tipo_regiao == "Todos":
-        #geojson_municipios = geojson.loads(gpd_municipios.to_json())
-        return get_map(input_value,geojson_municipios),gpd_municipios['nome'].unique().tolist(), 
-        
+       
+        if regiao == None:
+            return get_map(indicador,geojson_municipios),gpd_municipios['nome'].unique().tolist(), get_grafico_regiao(indicador,regiao,tipo_regiao)
+        return get_map(indicador,geojson_municipios),gpd_municipios['nome'].unique().tolist(),html.Div()         
     if tipo_regiao == "Intermediária":
         df_result = gpd_municipios[gpd_municipios['Intermediária'] == regiao ].copy()
         geojson_municipios_tmp = geojson.loads(df_result.to_json())
-        return get_map(input_value,geojson_municipios_tmp),df_result['nome'].unique().tolist(), 
+        if regiao == None:
+            return get_map(indicador,geojson_municipios_tmp),df_result['nome'].unique().tolist(),html.Div()    
+        if municipios == None:	
+            return get_map(indicador,geojson_municipios_tmp),gpd_municipios['nome'].unique().tolist(), get_grafico_regiao(indicador,regiao,tipo_regiao)            
+       
+        return get_map(indicador,geojson_municipios_tmp),df_result['nome'].unique().tolist(),html.Div() 
     
     if tipo_regiao == "Imediata":
         df_result = gpd_municipios[gpd_municipios['Imediata'] == regiao ].copy()
         geojson_municipios_tmp = geojson.loads(df_result.to_json())
-        return get_map(input_value,geojson_municipios_tmp),df_result['nome'].unique().tolist(), 
+        if regiao == None:
+            return get_map(indicador,geojson_municipios_tmp),df_result['nome'].unique().tolist(),html.Div()
+        if municipios == None:
+            return get_map(indicador,geojson_municipios_tmp),gpd_municipios['nome'].unique().tolist(), get_grafico_regiao(indicador,regiao,tipo_regiao)
+
+        return get_map(indicador,geojson_municipios_tmp),df_result['nome'].unique().tolist(), html.Div()
         
         
 
@@ -335,6 +397,7 @@ def update_output_div(input_value, color_prop="IGM",):
     )
 def update_regiao(input_value):
     if input_value == "Todos":
+        
         return [{'label': 'Todas', 'value': 'Todas'}]
     if input_value == "Intermediária":
         return gpd_municipios['Intermediária'].unique().tolist()
