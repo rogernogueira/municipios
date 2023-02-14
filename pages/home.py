@@ -131,8 +131,8 @@ def get_grafico_regiao(indicador,regiao,tipo_regiao):
     
     fig.add_trace(go.Scatter(x=df_result['ano'], y=df_result['Gestão'],
                         mode='lines+markers', name='Gestão'))
-    if regiao == "Todos":
-        fig.update_layout(title=f'Indicadores da região Tocantins',
+    if tipo_regiao == "Todos":
+        fig.update_layout(title=f'Indicadores do Tocantins',
                    xaxis_title='Ano',
                    yaxis_title='Valor do indicador')
     else:    
@@ -336,14 +336,12 @@ def map_indicador(indicador, tipo_regiao, regiao, municipios):
     print(municipios)
     #geojson_municipios_tmp = 
     if tipo_regiao == "Todos":
-       
-        if regiao == None:
-            return get_map(indicador,geojson_municipios),gpd_municipios['nome'].unique().tolist(), get_grafico_regiao(indicador,regiao,tipo_regiao)
-        return get_map(indicador,geojson_municipios),gpd_municipios['nome'].unique().tolist(),html.Div()         
+        return get_map(indicador,geojson_municipios),gpd_municipios['nome'].unique().tolist(), get_grafico_regiao(indicador,regiao,tipo_regiao)
+                
     if tipo_regiao == "Intermediária":
         df_result = gpd_municipios[gpd_municipios['Intermediária'] == regiao ].copy()
         geojson_municipios_tmp = geojson.loads(df_result.to_json())
-        if regiao == None:
+        if (regiao == None ) or (regiao not in gpd_municipios['Intermediária'].unique().tolist()):
             return get_map(indicador,geojson_municipios_tmp),df_result['nome'].unique().tolist(),html.Div()    
         if municipios == None:	
             return get_map(indicador,geojson_municipios_tmp),gpd_municipios['nome'].unique().tolist(), get_grafico_regiao(indicador,regiao,tipo_regiao)            
